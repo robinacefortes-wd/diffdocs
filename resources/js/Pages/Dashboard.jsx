@@ -422,19 +422,13 @@ function computeDiff(oldText, newText) {
 function DiffPane({ lines, side, scrollRef, onScroll }) {
     const MONO = "'DM Mono', 'Fira Code', monospace";
     const LINE_H = 21;
+    const GUTTER_W = 52;
     const isOld = side === "old";
-    const gutterRef = useRef(null);
-
-    const handleScroll = (e) => {
-        // Sync gutter vertical scroll with code area
-        if (gutterRef.current) gutterRef.current.scrollTop = e.currentTarget.scrollTop;
-        onScroll(e);
-    };
 
     return (
         <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{
-                padding: "6px 12px", fontSize: "0.9rem", fontWeight: 1000,
+                padding: "6px 12px", fontSize: "0.8rem", fontWeight: 1000,
                 letterSpacing: "0.1em", textTransform: "uppercase",
                 color: isOld ? "#e06c75" : "#4ec994",
                 background: isOld ? "rgba(224,108,117,0.08)" : "rgba(78,201,148,0.08)",
@@ -444,49 +438,40 @@ function DiffPane({ lines, side, scrollRef, onScroll }) {
                 {isOld ? "− Original" : "+ Modified"}
             </div>
 
-            <div style={{ flex: 1, minHeight: 0, display: "flex", overflow: "hidden" }}>
-                {/* Gutter — scrolls in sync with code area */}
-                <div ref={gutterRef} style={{ width: "52px", flexShrink: 0, overflowY: "hidden", overflowX: "hidden", background: "#0f1117" }}>
-                    <div style={{ display: "flex", flexDirection: "column" }}>
-                        {lines.map((row, idx) => {
-                            const text     = isOld ? row.oldText : row.newText;
-                            const isActive = isOld ? (row.type === "remove" || row.type === "change") : (row.type === "add" || row.type === "change");
-                            const isEmpty  = text === null;
-                            return (
-                                <div key={idx} style={{
-                                    height: `${LINE_H}px`, display: "flex", alignItems: "center",
-                                    justifyContent: "flex-end", gap: "4px", padding: "0 6px",
-                                    fontFamily: MONO, fontSize: "11px",
-                                    color: isActive ? (isOld ? "#e06c75" : "#4ec994") : "#3a3f55",
-                                    background: isActive ? (isOld ? "rgba(200,60,60,0.25)" : "rgba(40,180,100,0.22)") : "#0f1117",
-                                    userSelect: "none", flexShrink: 0,
-                                }}>
-                                    <span style={{ minWidth: "20px", textAlign: "right" }}>{isEmpty ? "" : idx + 1}</span>
-                                    <span style={{ minWidth: "10px", textAlign: "center", fontWeight: 700 }}>
-                                        {isEmpty ? "" : isActive ? (isOld ? "−" : "+") : " "}
-                                    </span>
-                                </div>
-                            );
-                        })}
-                        {lines.length === 0 && <div style={{ height: `${LINE_H}px` }} />}
-                    </div>
-                </div>
-
-                {/* Code area */}
-                <div ref={scrollRef} onScroll={handleScroll} style={{ flex: 1, overflowY: "auto", overflowX: "auto", minHeight: 0, minWidth: 0, background: "#0f1117" }}>
-                    {/* Inner wrapper ensures row highlights extend full scroll width */}
-                    <div style={{ display: "inline-block", minWidth: "100%" }}>
-                    {lines.map((row, idx) => {
-                        const text     = isOld ? row.oldText : row.newText;
-                        const isActive = isOld ? (row.type === "remove" || row.type === "change") : (row.type === "add" || row.type === "change");
-                        const isEmpty  = text === null;
-                        return (
-                            <div key={idx} style={{
-                                height: `${LINE_H}px`,
-                                minWidth: "100%",
-                                background: isActive ? (isOld ? "rgba(200,60,60,0.18)" : "rgba(40,180,100,0.15)") : "#0f1117",
-                                fontFamily: MONO, fontSize: "12px", lineHeight: `${LINE_H}px`,
-                                whiteSpace: "pre", padding: "0 12px",
+            {/* Single scroll container — gutter is sticky so it never desyncs */}
+            <div ref={scrollRef} onScroll={onScroll} style={{ flex: 1, overflowY: "auto", overflowX: "auto", minHeight: 0, background: "#0f1117", position: "relative" }}>
+                <div style={{ display: "inline-block", minWidth: "100%" }}>
+                {lines.map((row, idx) => {
+                    const text     = isOld ? row.oldText : row.newText;
+                    const isActive = isOld ? (row.type === "remove" || row.type === "change") : (row.type === "add" || row.type === "change");
+                    const isEmpty  = text === null;
+                    const activeBg = isOld ? "rgba(200,60,60,0.18)" : "rgba(40,180,100,0.15)";
+                    const gutterActiveBg = isOld ? "rgba(200,60,60,0.25)" : "rgba(40,180,100,0.22)";
+                    return (
+                        <div key={idx} style={{
+                            height: `${LINE_H}px`,
+                            display: "flex",
+                            background: isActive ? activeBg : "#0f1117",
+                            fontFamily: MONO, fontSize: "12px", lineHeight: `${LINE_H}px`,
+                        }}>
+                            {/* Sticky gutter cell */}
+                            <div style={{
+                                position: "sticky", left: 0, zIndex: 1,
+                                width: `${GUTTER_W}px`, flexShrink: 0,
+                                display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "4px",
+                                padding: "0 6px",
+                                background: isActive ? gutterActiveBg : "#0d1016",
+                                color: isActive ? (isOld ? "#e06c75" : "#4ec994") : "#3a3f55",
+                                fontSize: "11px", userSelect: "none",
+                            }}>
+                                <span style={{ minWidth: "20px", textAlign: "right" }}>{isEmpty ? "" : idx + 1}</span>
+                                <span style={{ minWidth: "10px", textAlign: "center", fontWeight: 700 }}>
+                                    {isEmpty ? "" : isActive ? (isOld ? "−" : "+") : " "}
+                                </span>
+                            </div>
+                            {/* Code cell */}
+                            <div style={{
+                                flex: 1, whiteSpace: "pre", padding: "0 12px",
                                 color: isEmpty ? "transparent" : (isActive ? (isOld ? "#f4a0a8" : "#7dd9b0") : "#b8c0d4"),
                             }}>
                                 {isEmpty ? "\u00A0" : tokenize(text ?? "").map((tok, ti) => (
@@ -495,15 +480,15 @@ function DiffPane({ lines, side, scrollRef, onScroll }) {
                                     </span>
                                 ))}
                             </div>
-                        );
-                    })}
-                    {lines.length === 0 && (
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "80px" }}>
-                            <span style={{ fontSize: "13px", color: "#3a3f55" }}>Paste code in the left panel to see the diff</span>
                         </div>
-                    )}
-                    </div>{/* end minWidth wrapper */}
-                </div>
+                    );
+                })}
+                {lines.length === 0 && (
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "80px" }}>
+                        <span style={{ fontSize: "13px", color: "#3a3f55" }}>Paste code in the left panel to see the diff</span>
+                    </div>
+                )}
+                </div>{/* end minWidth wrapper */}
             </div>
         </div>
     );
@@ -534,7 +519,7 @@ function VisualDiff({ oldCode, newCode }) {
             </p>
             <div style={{ background: "#13161e", border: "1px solid #2a2e3f", borderRadius: "12px", overflow: "hidden", display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 14px", borderBottom: "1px solid #2a2e3f", flexShrink: 0, background: "#0f1117" }}>
-                    <span style={{ fontSize: "0.9rem", fontWeight: 1000, color: "#4a5070", letterSpacing: "0.06em" }}>SPLIT VIEW</span>
+                    <span style={{ fontSize: "0.8rem", fontWeight: 1000, color: "#fff", letterSpacing: "0.06em" }}>SPLIT VIEW</span>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                         {statsRemove > 0 && <span style={{ fontSize: "11px", color: "#e06c75", fontFamily: "'DM Mono', monospace" }}>−{statsRemove}</span>}
                         {statsAdd    > 0 && <span style={{ fontSize: "11px", color: "#4ec994", fontFamily: "'DM Mono', monospace" }}>+{statsAdd}</span>}
