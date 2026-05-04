@@ -1,10 +1,16 @@
+# Stage 1: Build React/Vite assets
+FROM node:22-alpine AS build-stage
+WORKDIR /app
+COPY . .
+RUN npm install
+RUN npm run build
+
+# Stage 2: Final Production Image
 FROM richarvey/nginx-php-fpm:latest
+WORKDIR /var/www/html
 
-COPY . /var/www/html
-
-# Build React assets using Node 20
-RUN apk add --no-cache nodejs-current npm
-RUN npm install && npm run build
+# Copy the built assets from the previous stage
+COPY --from=build-stage /app /var/www/html
 
 # Laravel setup
 ENV WEBROOT /var/www/html/public
