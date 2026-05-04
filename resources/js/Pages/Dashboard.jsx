@@ -423,6 +423,13 @@ function DiffPane({ lines, side, scrollRef, onScroll }) {
     const MONO = "'DM Mono', 'Fira Code', monospace";
     const LINE_H = 21;
     const isOld = side === "old";
+    const gutterRef = useRef(null);
+
+    const handleScroll = (e) => {
+        // Sync gutter vertical scroll with code area
+        if (gutterRef.current) gutterRef.current.scrollTop = e.currentTarget.scrollTop;
+        onScroll(e);
+    };
 
     return (
         <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -438,8 +445,8 @@ function DiffPane({ lines, side, scrollRef, onScroll }) {
             </div>
 
             <div style={{ flex: 1, minHeight: 0, display: "flex", overflow: "hidden" }}>
-                {/* Gutter */}
-                <div style={{ width: "52px", flexShrink: 0, overflowY: "hidden", overflowX: "hidden", background: "#0f1117" }}>
+                {/* Gutter — scrolls in sync with code area */}
+                <div ref={gutterRef} style={{ width: "52px", flexShrink: 0, overflowY: "hidden", overflowX: "hidden", background: "#0f1117" }}>
                     <div style={{ display: "flex", flexDirection: "column" }}>
                         {lines.map((row, idx) => {
                             const text     = isOld ? row.oldText : row.newText;
@@ -466,7 +473,9 @@ function DiffPane({ lines, side, scrollRef, onScroll }) {
                 </div>
 
                 {/* Code area */}
-                <div ref={scrollRef} onScroll={onScroll} style={{ flex: 1, overflowY: "auto", overflowX: "auto", minHeight: 0, minWidth: 0, background: "#0f1117" }}>
+                <div ref={scrollRef} onScroll={handleScroll} style={{ flex: 1, overflowY: "auto", overflowX: "auto", minHeight: 0, minWidth: 0, background: "#0f1117" }}>
+                    {/* Inner wrapper ensures row highlights extend full scroll width */}
+                    <div style={{ display: "inline-block", minWidth: "100%" }}>
                     {lines.map((row, idx) => {
                         const text     = isOld ? row.oldText : row.newText;
                         const isActive = isOld ? (row.type === "remove" || row.type === "change") : (row.type === "add" || row.type === "change");
@@ -474,6 +483,7 @@ function DiffPane({ lines, side, scrollRef, onScroll }) {
                         return (
                             <div key={idx} style={{
                                 height: `${LINE_H}px`,
+                                minWidth: "100%",
                                 background: isActive ? (isOld ? "rgba(200,60,60,0.18)" : "rgba(40,180,100,0.15)") : "#0f1117",
                                 fontFamily: MONO, fontSize: "12px", lineHeight: `${LINE_H}px`,
                                 whiteSpace: "pre", padding: "0 12px",
@@ -492,6 +502,7 @@ function DiffPane({ lines, side, scrollRef, onScroll }) {
                             <span style={{ fontSize: "13px", color: "#3a3f55" }}>Paste code in the left panel to see the diff</span>
                         </div>
                     )}
+                    </div>{/* end minWidth wrapper */}
                 </div>
             </div>
         </div>
