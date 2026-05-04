@@ -2,8 +2,8 @@ FROM richarvey/nginx-php-fpm:latest
 
 COPY . /var/www/html
 
-# Build React assets
-RUN apk add --no-cache nodejs npm
+# Build React assets using Node 20
+RUN apk add --no-cache nodejs-current npm
 RUN npm install && npm run build
 
 # Laravel setup
