@@ -780,6 +780,8 @@ export default function Dashboard({
     useEffect(() => { setLiveDocs(technical_docs); setLivePR(pr_summary); }, [technical_docs, pr_summary]);
 
     useEffect(() => {
+        if (!window.Echo) return;
+        
         window.Echo.channel("docs").listen("DocGenerated", (e) => {
             setLiveDocs(e.result.technical_docs);
             setLivePR(e.result.pr_summary);
