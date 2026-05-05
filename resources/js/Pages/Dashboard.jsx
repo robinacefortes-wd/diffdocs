@@ -438,57 +438,54 @@ function DiffPane({ lines, side, scrollRef, onScroll }) {
                 {isOld ? "− Original" : "+ Modified"}
             </div>
 
-            {/* Single scroll container — gutter is sticky so it never desyncs */}
             <div ref={scrollRef} onScroll={onScroll} style={{ flex: 1, overflowY: "auto", overflowX: "auto", minHeight: 0, background: "#0f1117", position: "relative" }}>
                 <div style={{ display: "inline-block", minWidth: "100%" }}>
-                {lines.map((row, idx) => {
-                    const text     = isOld ? row.oldText : row.newText;
-                    const isActive = isOld ? (row.type === "remove" || row.type === "change") : (row.type === "add" || row.type === "change");
-                    const isEmpty  = text === null;
-                    const activeBg = isOld ? "rgba(200,60,60,0.18)" : "rgba(40,180,100,0.15)";
-                    const gutterActiveBg = isOld ? "rgba(200,60,60,0.25)" : "rgba(40,180,100,0.22)";
-                    return (
-                        <div key={idx} style={{
-                            height: `${LINE_H}px`,
-                            display: "flex",
-                            background: isActive ? activeBg : "#0f1117",
-                            fontFamily: MONO, fontSize: "12px", lineHeight: `${LINE_H}px`,
-                        }}>
-                            {/* Sticky gutter cell */}
-                            <div style={{
-                                position: "sticky", left: 0, zIndex: 1,
-                                width: `${GUTTER_W}px`, flexShrink: 0,
-                                display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "4px",
-                                padding: "0 6px",
-                                background: isActive ? gutterActiveBg : "#0d1016",
-                                color: isActive ? (isOld ? "#e06c75" : "#4ec994") : "#3a3f55",
-                                fontSize: "11px", userSelect: "none",
+                    {lines.map((row, idx) => {
+                        const text     = isOld ? row.oldText : row.newText;
+                        const isActive = isOld ? (row.type === "remove" || row.type === "change") : (row.type === "add" || row.type === "change");
+                        const isEmpty  = text === null;
+                        const activeBg = isOld ? "rgba(200,60,60,0.18)" : "rgba(40,180,100,0.15)";
+                        const gutterActiveBg = isOld ? "rgba(200,60,60,0.25)" : "rgba(40,180,100,0.22)";
+                        return (
+                            <div key={idx} style={{
+                                height: `${LINE_H}px`,
+                                display: "flex",
+                                background: isActive ? activeBg : "#0f1117",
+                                fontFamily: MONO, fontSize: "12px", lineHeight: `${LINE_H}px`,
                             }}>
-                                <span style={{ minWidth: "20px", textAlign: "right" }}>{isEmpty ? "" : idx + 1}</span>
-                                <span style={{ minWidth: "10px", textAlign: "center", fontWeight: 700 }}>
-                                    {isEmpty ? "" : isActive ? (isOld ? "−" : "+") : " "}
-                                </span>
-                            </div>
-                            {/* Code cell */}
-                            <div style={{
-                                flex: 1, whiteSpace: "pre", padding: "0 12px",
-                                color: isEmpty ? "transparent" : (isActive ? (isOld ? "#f4a0a8" : "#7dd9b0") : "#b8c0d4"),
-                            }}>
-                                {isEmpty ? "\u00A0" : tokenize(text ?? "").map((tok, ti) => (
-                                    <span key={ti} style={{ color: isActive ? undefined : TOKEN_COLORS[tok.type] || "#b8c0d4" }}>
-                                        {tok.value}
+                                <div style={{
+                                    position: "sticky", left: 0, zIndex: 1,
+                                    width: `${GUTTER_W}px`, flexShrink: 0,
+                                    display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "4px",
+                                    padding: "0 6px",
+                                    background: isActive ? gutterActiveBg : "#0d1016",
+                                    color: isActive ? (isOld ? "#e06c75" : "#4ec994") : "#3a3f55",
+                                    fontSize: "11px", userSelect: "none",
+                                }}>
+                                    <span style={{ minWidth: "20px", textAlign: "right" }}>{isEmpty ? "" : idx + 1}</span>
+                                    <span style={{ minWidth: "10px", textAlign: "center", fontWeight: 700 }}>
+                                        {isEmpty ? "" : isActive ? (isOld ? "−" : "+") : " "}
                                     </span>
-                                ))}
+                                </div>
+                                <div style={{
+                                    flex: 1, whiteSpace: "pre", padding: "0 12px",
+                                    color: isEmpty ? "transparent" : (isActive ? (isOld ? "#f4a0a8" : "#7dd9b0") : "#b8c0d4"),
+                                }}>
+                                    {isEmpty ? "\u00A0" : tokenize(text ?? "").map((tok, ti) => (
+                                        <span key={ti} style={{ color: isActive ? undefined : TOKEN_COLORS[tok.type] || "#b8c0d4" }}>
+                                            {tok.value}
+                                        </span>
+                                    ))}
+                                </div>
                             </div>
+                        );
+                    })}
+                    {lines.length === 0 && (
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "80px" }}>
+                            <span style={{ fontSize: "13px", color: "#3a3f55" }}>Paste code in the left panel to see the diff</span>
                         </div>
-                    );
-                })}
-                {lines.length === 0 && (
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "80px" }}>
-                        <span style={{ fontSize: "13px", color: "#3a3f55" }}>Paste code in the left panel to see the diff</span>
-                    </div>
-                )}
-                </div>{/* end minWidth wrapper */}
+                    )}
+                </div>
             </div>
         </div>
     );
@@ -651,7 +648,7 @@ export default function Dashboard({
         ? "opacity-40 grayscale transition-all duration-300"
         : "opacity-100 grayscale-0 transition-all duration-300";
 
-    // ── Button content ─────────────────────────────────────────────────────────
+    // ── Button content ──────────────────────────────────────────────────────
 
     const btnContent = processing ? (
         <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
@@ -672,7 +669,7 @@ export default function Dashboard({
         </>
     );
 
-    // ── Submit button ──────────────────────────────────────────────────────────
+    // ── Submit button style ─────────────────────────────────────────────────
 
     const submitBtnStyle = {
         height: "46px", padding: "0 32px", width: "fit-content",
@@ -686,7 +683,7 @@ export default function Dashboard({
         letterSpacing: "-0.01em", flexShrink: 0, whiteSpace: "nowrap",
     };
 
-    // ── Error banner ───────────────────────────────────────────────────────────
+    // ── Error banner ────────────────────────────────────────────────────────
 
     const errorBanner = inputError && (
         <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", padding: "10px 14px", borderRadius: "8px", background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.3)", flexShrink: 0 }}>
@@ -701,7 +698,7 @@ export default function Dashboard({
         </div>
     );
 
-    // ── Header ─────────────────────────────────────────────────────────────────
+    // ── Header ──────────────────────────────────────────────────────────────
 
     const headerEl = (
         <header style={{
@@ -716,7 +713,8 @@ export default function Dashboard({
             }}>
                 Diff<span style={{ color: "#00d4a4" }}>Docs</span>
             </h1>
-            <p style={{ fontSize: isMobile ? "0.92rem" : "0.85rem", color: "#fff", fontWeight: 1000, margin: 0, textAlign: "center", whiteSpace: isMobile ? "normal" : "nowrap" }}>
+            <p style={{ 
+                fontSize: isMobile ? "0.95rem" : "0.9rem", color: "rgba(255, 255, 255, 0.9)", fontWeight: 1000, letterSpacing: "0.02em", margin: 0, textAlign: "center", whiteSpace: isMobile ? "normal" : "nowrap"}}>
                 Generate technical docs and PR summaries from your code diffs.
             </p>
             <div style={{ justifySelf: "end" }}>
@@ -736,7 +734,7 @@ export default function Dashboard({
         </header>
     );
 
-    // ── MOBILE ─────────────────────────────────────────────────────────────────
+    // ── MOBILE ──────────────────────────────────────────────────────────────
 
     if (isMobile) {
         return (
@@ -747,15 +745,10 @@ export default function Dashboard({
                     <div style={{ padding: "0 12px 40px", display: "flex", flexDirection: "column", gap: "24px" }}>
                         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                             <p style={{ fontSize: "0.9rem", fontWeight: 1000, letterSpacing: "0.12em", textTransform: "uppercase", color: "#ffffff", margin: 0 }}>Code Diff Input</p>
-                            <div style={{ background: "rgba(19,22,30,0.75)", backdropFilter: "blur(8px)", border: "1px solid #2a2e3f", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column" }}>
+                            <div style={{ background: "rgba(19,22,30,0.75)", backdropFilter: "blur(8px)", border: "1px solid #2a2e3f", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "16px" }}>
                                 <div style={{ display: "flex", flexDirection: "column", gap: "8px", height: "240px" }}>
                                     <span style={{ fontSize: "0.9rem", fontWeight: 1000, letterSpacing: "0.12em", textTransform: "uppercase", color: "#ffffff" }}>Old Code</span>
                                     <EditorPane value={data.old_code} onChange={(val) => setData("old_code", val)} placeholder="// Paste the original code here..." />
-                                </div>
-                                <div style={{ display: "flex", alignItems: "center", gap: "10px", margin: "12px 0" }}>
-                                    <div style={{ height: "1px", flex: 1, background: "#2a2e3f" }} />
-                                    <span style={{ fontSize: "11px", color: "#3a3f55", fontFamily: "monospace", userSelect: "none" }}>↓</span>
-                                    <div style={{ height: "1px", flex: 1, background: "#2a2e3f" }} />
                                 </div>
                                 <div style={{ display: "flex", flexDirection: "column", gap: "8px", height: "240px" }}>
                                     <span style={{ fontSize: "0.9rem", fontWeight: 1000, letterSpacing: "0.12em", textTransform: "uppercase", color: "#ffffff" }}>New Code</span>
@@ -778,7 +771,7 @@ export default function Dashboard({
         );
     }
 
-    // ── TABLET ─────────────────────────────────────────────────────────────────
+    // ── TABLET ──────────────────────────────────────────────────────────────
 
     if (isTablet) {
         return (
@@ -789,15 +782,10 @@ export default function Dashboard({
                     <div style={{ padding: "0 28px 48px", display: "flex", flexDirection: "column", gap: "28px" }}>
                         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                             <p style={{ fontSize: "0.9rem", fontWeight: 1000, letterSpacing: "0.12em", textTransform: "uppercase", color: "#ffffff", margin: 0 }}>Code Diff Input</p>
-                            <div style={{ background: "rgba(19,22,30,0.75)", backdropFilter: "blur(8px)", border: "1px solid #2a2e3f", borderRadius: "12px", padding: "20px", display: "flex", flexDirection: "column" }}>
+                            <div style={{ background: "rgba(19,22,30,0.75)", backdropFilter: "blur(8px)", border: "1px solid #2a2e3f", borderRadius: "12px", padding: "20px", display: "flex", flexDirection: "column", gap: "16px" }}>
                                 <div style={{ display: "flex", flexDirection: "column", gap: "8px", height: "280px" }}>
                                     <span style={{ fontSize: "0.9rem", fontWeight: 1000, letterSpacing: "0.12em", textTransform: "uppercase", color: "#ffffff" }}>Old Code</span>
                                     <EditorPane value={data.old_code} onChange={(val) => setData("old_code", val)} placeholder="// Paste the original code here..." />
-                                </div>
-                                <div style={{ display: "flex", alignItems: "center", gap: "10px", margin: "12px 0" }}>
-                                    <div style={{ height: "1px", flex: 1, background: "#2a2e3f" }} />
-                                    <span style={{ fontSize: "11px", color: "#3a3f55", fontFamily: "monospace", userSelect: "none" }}>↓</span>
-                                    <div style={{ height: "1px", flex: 1, background: "#2a2e3f" }} />
                                 </div>
                                 <div style={{ display: "flex", flexDirection: "column", gap: "8px", height: "280px" }}>
                                     <span style={{ fontSize: "0.9rem", fontWeight: 1000, letterSpacing: "0.12em", textTransform: "uppercase", color: "#ffffff" }}>New Code</span>
@@ -820,7 +808,7 @@ export default function Dashboard({
         );
     }
 
-    // ── DESKTOP ────────────────────────────────────────────────────────────────
+    // ── DESKTOP ──────────────────────────────────────────────────────────────
 
     return (
         <>
@@ -835,22 +823,13 @@ export default function Dashboard({
                             <div style={{ width: "480px", flexShrink: 0, display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
                                 <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px", flex: 1, minHeight: 0, overflow: "hidden" }}>
                                     <p style={{ fontSize: "0.9rem", fontWeight: 1000, letterSpacing: "0.12em", textTransform: "uppercase", color: "#ffffff", margin: 0, flexShrink: 0 }}>Code Diff Input</p>
-                                    <div style={{ background: "rgba(19,22,30,0.75)", backdropFilter: "blur(8px)", border: "1px solid #2a2e3f", borderRadius: "12px", padding: "20px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0, overflow: "hidden" }}>
+                                    <div style={{ background: "rgba(19,22,30,0.75)", backdropFilter: "blur(8px)", border: "1px solid #2a2e3f", borderRadius: "12px", padding: "20px", display: "flex", flexDirection: "column", gap: "16px", flex: 1, minHeight: 0, overflow: "hidden" }}>
                                         <div style={{ display: "flex", flexDirection: "column", gap: "8px", flex: 1, minHeight: 0, overflow: "hidden" }}>
-                                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
-                                                <span style={{ fontSize: "0.9rem", fontWeight: 1000, letterSpacing: "0.12em", textTransform: "uppercase", color: "#ffffff" }}>Old Code</span>
-                                            </div>
+                                            <span style={{ fontSize: "0.9rem", fontWeight: 1000, letterSpacing: "0.12em", textTransform: "uppercase", color: "#ffffff", flexShrink: 0 }}>Old Code</span>
                                             <EditorPane value={data.old_code} onChange={(val) => setData("old_code", val)} placeholder="// Paste the original code here..." />
                                         </div>
-                                        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0, margin: "12px 0" }}>
-                                            <div style={{ height: "1px", flex: 1, background: "#2a2e3f" }} />
-                                            <span style={{ fontSize: "11px", color: "#3a3f55", fontFamily: "monospace", userSelect: "none" }}>↓</span>
-                                            <div style={{ height: "1px", flex: 1, background: "#2a2e3f" }} />
-                                        </div>
                                         <div style={{ display: "flex", flexDirection: "column", gap: "8px", flex: 1, minHeight: 0, overflow: "hidden" }}>
-                                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
-                                                <span style={{ fontSize: "0.9rem", fontWeight: 1000, letterSpacing: "0.12em", textTransform: "uppercase", color: "#ffffff" }}>New Code</span>
-                                            </div>
+                                            <span style={{ fontSize: "0.9rem", fontWeight: 1000, letterSpacing: "0.12em", textTransform: "uppercase", color: "#ffffff", flexShrink: 0 }}>New Code</span>
                                             <EditorPane value={data.new_code} onChange={(val) => setData("new_code", val)} placeholder="// Paste the updated code here..." />
                                         </div>
                                     </div>
