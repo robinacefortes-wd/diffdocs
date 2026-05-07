@@ -100,10 +100,10 @@ class GroqService
     {
         $response = Http::withToken($this->apiKey)
             ->timeout(60)
-            ->retry(2, 1000) // Retry once after 1 second on failure — fixes the inconsistency issue
+            ->retry(2, 1000) 
             ->post($this->baseUrl, [
                 'model'       => 'llama-3.3-70b-versatile',
-                'temperature' => 0.3, // Lower temperature = more consistent, deterministic output
+                'temperature' => 0.3, 
                 'messages'    => [
                     [
                         'role'    => 'system',

@@ -6,7 +6,6 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# Stage 2: Final Production Image
 FROM serversideup/php:8.4-fpm-nginx
 WORKDIR /var/www/html
 
@@ -22,14 +21,13 @@ ENV APP_ENV=production
 # Install Composer dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Ensure bootstrap/cache exists (Laravel standard path)
 RUN mkdir -p /var/www/html/storage/logs \
              /var/www/html/storage/framework/cache \
              /var/www/html/storage/framework/sessions \
              /var/www/html/storage/framework/views \
              /var/www/html/bootstrap/cache
 
-# Set correct permissions
+# correct permissions
 RUN chown -R www-data:www-data \
         /var/www/html/storage \
         /var/www/html/bootstrap/cache && \

@@ -19,7 +19,6 @@ class DocGenerated implements ShouldBroadcastNow
 
     public function broadcastOn(): array
     {
-        // This is the "Radio Station" name the frontend will listen to
         return [
             new Channel('docs'),
         ];
